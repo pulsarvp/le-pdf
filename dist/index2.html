@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="../node_modules/pdfjs-dist/build/pdf.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.0.2/js/swiper.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.0.2/css/swiper.min.css" integrity="sha256-HPZzi90HCGcMdH4ydWhQXg7MBauAGR+I40HGtKHEE98=" crossorigin="anonymous" />
+    <style>
+      html, body {
+        position: relative;
+        height: 100%;
+      }
+
+      body {
+        background: #fff;
+        font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+        font-size: 14px;
+        color:#000;
+        margin: 0;
+        padding: 0;
+        background: #ccc;
+      }
+    </style>
+<script type="text/javascript" src="le-pdf.js"></script></head>
+<body>
+
+    <div id="app" style="width: 900px;"></div>
+
+    <!-- built files will be auto injected -->
+    <script>
+      const pdfCarousel = new window.lePdf(document.getElementById('app'), {
+        url: '../pulsar.pdf',
+        direction: 'vertical',
+      });
+    </script>
+
+</body>
+</html>
