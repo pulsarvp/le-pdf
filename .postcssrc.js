@@ -6,7 +6,6 @@ module.exports = {
     'precss' : {},
     'postcss-flexbugs-fixes': {},
     'postcss-inline-svg': {},
-    'postcss-brand-colors': {},
     'postcss-hexrgba': {},
     'postcss-calc': {},
     'postcss-url' : { url : 'inline' },
