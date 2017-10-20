@@ -24,9 +24,14 @@ module.exports = {
     new HtmlWebpackPlugin({
       title: 'Le PDF',
       inject: 'head',
-      js: ['node_modules/pdfjs-dist/build/pdf.js'],
       filename: 'index.html',
       template: 'index.html',
+    }),
+    new HtmlWebpackPlugin({
+      title: 'Le PDF',
+      inject: 'head',
+      filename: 'index2.html',
+      template: 'index2.html',
     }),
   ],
   externals: {
