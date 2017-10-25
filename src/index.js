@@ -21,6 +21,7 @@ const verticalOptions = {
   scrollbar: {
     el: '.swiper-scrollbar',
   },
+  slidesPerView: 'auto',
   spaceBetween: 30,
   mousewheel: true,
 };
@@ -67,6 +68,7 @@ const Controls = (player) => {
       click: () => player.swiper.slideNext(),
     },
   });
+
   const prev = $('<button/>', {
     class: 'le-pdf-control le-pdf-control--prev',
     html: `

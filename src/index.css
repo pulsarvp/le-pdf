@@ -22,7 +22,8 @@
 .le-pdf-carousel {
   width: 100%;
   height: 100%;
-  background-color: #e2e2e
+  background-color: #e2e2e2;
+
   .swiper-pagination-progressbar {
     width: 100%;
     height: 4px;
@@ -44,7 +45,10 @@
 }
 
 .le-pdf--vertical {
-  height: 100%
+  height: 100%;
+  .swiper-slide {
+    height: auto;
+  }
   .le-pdf-control--next,
   .le-pdf-control--prev {
     margin-top: -2px;
