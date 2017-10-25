@@ -21,6 +21,7 @@ const verticalOptions = {
   scrollbar: {
     el: '.swiper-scrollbar',
   },
+  spaceBetween: 30,
   mousewheel: true,
 };
 
