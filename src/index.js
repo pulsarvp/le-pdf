@@ -83,9 +83,14 @@ const Controls = (player) => {
   return result;
 };
 
+const Loader = () => $('<div/>', {
+  text: 'Загрузка...',
+  class: 'le-pdf-loader',
+});
+
 class lePdf {
   constructor(el, options) {
-    this._el = $(el);
+    this.element = $(el);
     this._initialEl = $(el).clone();
     this._inited = false;
     this.userOptions = options;
@@ -94,7 +99,7 @@ class lePdf {
   }
 
   _getPageContext(page) {
-    const width = this.options.width || $(this._el).width();
+    const width = this.options.width || $(this.element).width();
     const viewport = page.getViewport(1);
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -143,17 +148,29 @@ class lePdf {
     return result;
   }
 
-  async renderElement() {
+  rerender() {
+    $(this.element).replaceWith(this.element);
+  }
+
+  async render() {
     const { id, direction } = this.options;
-    const result = $(this._el).clone()
+
+    if (this._inited) {
+      this.destroy();
+    }
+
+    this.element
       .addClass(id)
       .addClass('le-pdf');
 
     if (direction) {
-      result.addClass(`le-pdf--${direction}`);
+      this.element.addClass(`le-pdf--${direction}`);
     }
 
+    this.element.prepend(Loader());
+
     const pages = await this.renderPages();
+    this.element.addClass('le-pdf--pdf-loaded');
 
     const childrens = [
       Carousel(this, {
@@ -163,21 +180,9 @@ class lePdf {
       Controls(this),
     ];
 
-    childrens.forEach(item => result.prepend(item));
-
-    return result;
-  }
-
-  async render() {
-    const { direction } = this.options;
-    if (this._inited) {
-      this.destroy();
-    }
+    childrens.forEach(item => this.element.prepend(item));
 
     const swiperOptions = direction === 'vertical' ? verticalOptions : horizontalOptions;
-
-    this.element = await this.renderElement();
-    $(this._el).replaceWith(this.element);
 
     nextTick(() => {
       this.swiper = new window.Swiper('.swiper-container', {
@@ -186,13 +191,11 @@ class lePdf {
         },
         ...swiperOptions,
       });
-      // this.swiper.on('init', this._onSwiperInit.bind(this));
     });
   }
 
   destroy() {
-    $(this._el).replaceWith(this._initialEl);
-    // this.swiper.off('init');
+    $(this.element).replaceWith(this._initialEl);
   }
 }
 
