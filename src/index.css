@@ -1,5 +1,7 @@
 .le-pdf {
   overflow: hidden;
+  position: relative;
+  background-color: #e2e2e2;
 }
 
 .le-pdf-control--next,
@@ -22,7 +24,10 @@
 .le-pdf-carousel {
   width: 100%;
   height: 100%;
-  background-color: #e2e2e2;
+
+  .swiper-scrollbar-drag {
+    min-height: 10px;
+  }
 
   .swiper-pagination-progressbar {
     width: 100%;
@@ -105,19 +110,37 @@
 
 @keyframes le-pdf-loader {
   0% {
-    -webkit-transform: rotate(0deg);
     transform: rotate(0deg);
   }
   100% {
-    -webkit-transform: rotate(360deg);
     transform: rotate(360deg);
   }
 }
 
 
-.le-pdf--pdf-loaded {
+.le-pdf--pdf-loaded,
+.le-pdf--error {
   .le-pdf-loader {
     display: none;
     animation: none;
   }
+}
+
+.le-pdf--error {
+  .le-pdf-control {
+    opacity: 0.2;
+    pointer-events: none;
+  }
+}
+
+.le-pdf-error {
+  background: red;
+  color: white;
+  font-weight: 500;
+  width: 100%;
+  height: auto;
+  text-align: center;
+  font-size: 15px;
+  box-sizing: border-box;
+  padding: 15px;
 }
