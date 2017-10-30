@@ -134,6 +134,7 @@
 }
 
 .le-pdf-error {
+  display: none;
   background: red;
   color: white;
   font-weight: 500;
@@ -143,4 +144,10 @@
   font-size: 15px;
   box-sizing: border-box;
   padding: 15px;
+}
+
+.le-pdf--error {
+  .le-pdf-error {
+    display: block;
+  }
 }

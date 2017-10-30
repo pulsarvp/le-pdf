@@ -53,6 +53,7 @@ const Carousel = (player, options) => {
   const result = $('<div/>', {
     class: 'le-pdf-carousel',
     html,
+    css: { height: `${player._slideHeight}px` },
   });
 
   const slides = pages.map(item =>
@@ -248,7 +249,6 @@ class lePdf {
           cache: true,
           renderSlide: index => SwiperSlide(this.renderPage(index)),
         },
-        height: this._slideHeight ? this._slideHeight : '',
         spaceBetween: 30,
         ...swiperOptions,
       });
@@ -272,7 +272,7 @@ class lePdf {
       errorEl.text(this.error);
     }
 
-    if (this.error == null) {
+    if (this.error === '' || this.error == null) {
       this.element.removeClass('le-pdf--error');
     } else {
       this.element.addClass('le-pdf--error');
