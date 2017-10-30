@@ -3,5 +3,9 @@ export function generateId() {
     .toString(16)
     .substring(1)}`;
 }
+export function isFunction(functionToCheck) {
+  const getType = {};
+  return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+}
 
 export default {};

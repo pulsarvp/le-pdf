@@ -1,18 +1,20 @@
 /* global $ */
 /* global PDFJS */
 import nextTick from 'next-tick';
-import { generateId } from './utils';
+import { generateId, isFunction } from './utils';
 import './index.css';
 
-
 PDFJS.disableWorker = true;
-const defaultOptions = {};
+const defaultOptions = {
+  direction: 'horizontal',
+};
 
 const horizontalOptions = {
   pagination: {
     el: '.swiper-pagination',
     type: 'progressbar',
   },
+  autoHeight: true,
 };
 
 const verticalOptions = {
@@ -20,12 +22,18 @@ const verticalOptions = {
   freeMode: true,
   scrollbar: {
     el: '.swiper-scrollbar',
+    draggable: true,
   },
   mousewheel: true,
 };
 
+const SwiperSlide = children =>
+  $('<div />', {
+    class: 'swiper-slide',
+  }).append(children);
+
 const Carousel = (player, options) => {
-  const { direction, pages } = options;
+  const { direction, pages = [] } = options;
   const verticalTemplate = `
     <div class="swiper-container">
       <div class="swiper-wrapper">
@@ -47,8 +55,13 @@ const Carousel = (player, options) => {
     html,
   });
 
-  const slides = pages.map(item => $('<div />').addClass('swiper-slide').append(item));
-  result.find('.swiper-wrapper').append(slides);
+  const slides = pages.map(item =>
+    $('<div />')
+      .addClass('swiper-slide')
+      .append(item));
+  if (slides.length > 0) {
+    result.find('.swiper-wrapper').append(slides);
+  }
   return result;
 };
 
@@ -66,6 +79,7 @@ const Controls = (player) => {
       click: () => player.swiper.slideNext(),
     },
   });
+
   const prev = $('<button/>', {
     class: 'le-pdf-control le-pdf-control--prev',
     html: `
@@ -83,38 +97,34 @@ const Controls = (player) => {
   return result;
 };
 
-const Loader = () => $('<div/>', {
-  text: 'Загрузка...',
-  class: 'le-pdf-loader',
-});
+const Loader = () =>
+  $('<div/>', {
+    text: 'Загрузка...',
+    class: 'le-pdf-loader',
+  });
+
+const ErrorManager = () =>
+  $('<div/>', {
+    class: 'le-pdf-error',
+  });
 
 class lePdf {
   constructor(el, options) {
     this.element = $(el);
     this._initialEl = $(el).clone();
     this._inited = false;
+    this._error = '';
     this.userOptions = options;
     this.options = this.getOptions();
-    this.render();
+    this.render().then(() => this.onInit());
   }
 
-  _getPageContext(page) {
-    const width = this.options.width || $(this.element).width();
-    const viewport = page.getViewport(1);
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const scale = width / viewport.width;
-
-    canvas.width = width;
-    canvas.height = scale * viewport.height;
-    $(canvas).css('height', `${scale * viewport.height}px`);
-
-    const renderContext = {
-      canvasContext: ctx,
-      viewport: page.getViewport(scale),
-    };
-
-    return { canvas, renderContext };
+  onInit() {
+    const { onInit } = this.options;
+    this._updateErorrs();
+    if (onInit != null && isFunction(onInit)) {
+      onInit.apply(this);
+    }
   }
 
   /**
@@ -129,39 +139,69 @@ class lePdf {
     return options;
   }
 
-  async renderPages() {
-    const pdfDoc = await PDFJS.getDocument(this.options.url);
-    const promises = [];
-    const result = [];
-
-    for (let num = 1; num <= pdfDoc.numPages; num += 1) {
-      promises.push(pdfDoc.getPage(num));
+  async getPages() {
+    const { direction } = this.options;
+    if (this.pdfDoc == null) {
+      this._pdfDoc = await PDFJS.getDocument(this.options.url);
     }
 
-    const pdfPages = await Promise.all(promises);
+    // Get slide height for vertical mode
+    if (direction === 'vertical') {
+      const viewport = (await this._pdfDoc.getPage(1)).getViewport(1);
+      const scale = this.width / viewport.width;
+      const slideHeight = scale * viewport.height;
+      this._slideHeight = slideHeight + 30;
+    }
+    const promises = [];
 
-    pdfPages.forEach((item) => {
-      const { canvas, renderContext } = this._getPageContext(item);
-      result.push(canvas);
-      item.render(renderContext);
-    });
-    return result;
+    for (let num = 1; num <= this._pdfDoc.numPages; num += 1) {
+      promises.push(this._pdfDoc.getPage(num));
+    }
+
+    if (this._pages == null) {
+      this._pages = await Promise.all(promises);
+    }
+    return this._pages;
   }
 
   rerender() {
     $(this.element).replaceWith(this.element);
   }
 
+  get width() {
+    return this.options.width || $(this.element).width();
+  }
+
+  renderPage(page) {
+    const width = this.options.width || $(this.element).width();
+    const viewport = page.getViewport(1);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const scale = width / viewport.width;
+
+    canvas.width = width;
+    canvas.height = scale * viewport.height;
+
+    $(canvas).css('height', `${scale * viewport.height}px`);
+
+    const renderContext = {
+      canvasContext: ctx,
+      viewport: page.getViewport(scale),
+    };
+    page.render(renderContext);
+
+    return canvas;
+  }
+
   async render() {
     const { id, direction } = this.options;
+    let pages = [];
 
     if (this._inited) {
       this.destroy();
     }
 
-    this.element
-      .addClass(id)
-      .addClass('le-pdf');
+    this.element.addClass(id).addClass('le-pdf');
 
     if (direction) {
       this.element.addClass(`le-pdf--${direction}`);
@@ -169,35 +209,83 @@ class lePdf {
 
     this.element.prepend(Loader());
 
-    const pages = await this.renderPages();
+    try {
+      pages = await this.getPages();
+    } catch (err) {
+      let { message } = err;
+      if (err.name === 'MissingPDFException') {
+        message = `PDF файл '${this.options.url}' не найден.`;
+      } else if (err.name === 'InvalidPDFException') {
+        message = `PDF файл '${this.options.url}' поврежден.`;
+      }
+      this.error = message;
+    }
+
     this.element.addClass('le-pdf--pdf-loaded');
 
     const childrens = [
       Carousel(this, {
-        pages,
         direction,
       }),
+      ErrorManager(),
       Controls(this),
     ];
 
     childrens.forEach(item => this.element.prepend(item));
 
-    const swiperOptions = direction === 'vertical' ? verticalOptions : horizontalOptions;
+    const swiperOptions =
+      direction === 'vertical' ? verticalOptions : horizontalOptions;
+
+    if (pages.length === 0) return;
 
     nextTick(() => {
       this.swiper = new window.Swiper('.swiper-container', {
         keyboard: {
           enabled: true,
         },
+        virtual: {
+          slides: pages,
+          cache: true,
+          renderSlide: index => SwiperSlide(this.renderPage(index)),
+        },
+        height: this._slideHeight ? this._slideHeight : '',
+        spaceBetween: 30,
         ...swiperOptions,
       });
     });
+  }
+
+  set error(value) {
+    if (value == null) {
+      this._error = '';
+    } else {
+      this._error = `${this._error} ${value}`;
+    }
+
+    this._updateErorrs();
+  }
+
+  _updateErorrs() {
+    const errorEl = this.element.find('.le-pdf-error');
+
+    if (errorEl.length > 0) {
+      errorEl.text(this.error);
+    }
+
+    if (this.error == null) {
+      this.element.removeClass('le-pdf--error');
+    } else {
+      this.element.addClass('le-pdf--error');
+    }
+  }
+
+  get error() {
+    return this._error;
   }
 
   destroy() {
     $(this.element).replaceWith(this._initialEl);
   }
 }
-
 
 window.lePdf = lePdf;
