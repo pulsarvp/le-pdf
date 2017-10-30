@@ -27,6 +27,7 @@
 
   .swiper-scrollbar-drag {
     min-height: 10px;
+    background: #007aff;
   }
 
   .swiper-pagination-progressbar {
@@ -82,12 +83,20 @@
   &:focus {
     background: #f4f5f4;
   }
+  &:active {
+    background: #e6e6e6;
+  }
 }
 
 .le-pdf-controls {
   display: flex;
   background: white;
   justify-content: center;
+}
+.le-pdf--vertical {
+  .le-pdf-controls {
+    border-bottom: 1px solid rgba(#007aff, 0.2);
+  }
 }
 
 
