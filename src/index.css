@@ -78,6 +78,10 @@
   border: none;
   height: 30px;
   width: 30px;
+  &:hover,
+  &:focus {
+    background: #f4f5f4;
+  }
 }
 
 .le-pdf-controls {
