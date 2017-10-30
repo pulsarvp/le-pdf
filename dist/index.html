@@ -25,24 +25,29 @@
         background: #ccc;
       }
 
-      #app {
-        max-width: 900px;
+      #pdf {
+        min-height: 300px;
         width: 100%;
+        height: 100%;
+      }
+      .container {
+        max-width: 900px;
+        box-sizing: border-box;
         padding-left: 10px;
         padding-right: 10px;
-        box-sizing: border-box;
       }
     </style>
 <script type="text/javascript" src="le-pdf.js"></script></head>
 <body>
 
-    <div id="app"></div>
+    <div class="container">
+      <div id="pdf"></div>
+    </div>
 
     <!-- built files will be auto injected -->
     <script>
-      const pdfCarousel = new window.lePdf(document.getElementById('app'), {
+      const pdfCarousel = new window.lePdf(document.getElementById('pdf'), {
         url: '../pulsar.pdf',
-        direction: 'horizontal',
       });
     </script>
 
