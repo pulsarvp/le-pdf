@@ -151,7 +151,7 @@ class lePdf {
       const viewport = (await this._pdfDoc.getPage(1)).getViewport(1);
       const scale = this.width / viewport.width;
       const slideHeight = scale * viewport.height;
-      this._slideHeight = slideHeight + 30;
+      this._slideHeight = slideHeight + 10;
     }
     const promises = [];
 
@@ -249,7 +249,7 @@ class lePdf {
           cache: true,
           renderSlide: index => SwiperSlide(this.renderPage(index)),
         },
-        spaceBetween: 30,
+        spaceBetween: 10,
         ...swiperOptions,
       });
     });
