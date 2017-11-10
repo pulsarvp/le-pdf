@@ -109,6 +109,15 @@ const ErrorManager = () =>
     class: 'le-pdf-error',
   });
 
+/**
+ * @class lePdf
+ * @param {jQuery|HTMLElement} element Element when lePdf will init
+ * @param {Object} [options]
+ * @param {String} [options.direction='horizontal'] Could be 'horizontal' or 'vertical'.
+ * @param {String} [options.url] Url to pdf document
+ * @param {Number|String} [options.width] Width of slider
+ * @param {Function} [options.onInit] On init callback
+ */
 class lePdf {
   constructor(el, options) {
     this.element = $(el);
@@ -240,7 +249,8 @@ class lePdf {
     if (pages.length === 0) return;
 
     nextTick(() => {
-      this.swiper = new window.Swiper('.swiper-container', {
+      const swiperHTMLelement = this.element.find('.swiper-container');
+      this.swiper = new window.Swiper(swiperHTMLelement, {
         keyboard: {
           enabled: true,
         },
