@@ -33,6 +33,9 @@ module.exports = {
       filename: 'index2.html',
       template: 'index2.html',
     }),
+    new webpack.DefinePlugin({
+        VERSION: JSON.stringify(require("./package.json").version),
+    }),
   ],
   externals: {
     jquery: 'jquery',
