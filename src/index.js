@@ -298,4 +298,7 @@ class lePdf {
   }
 }
 
+/* global VERSION */
+lePdf.version = VERSION;
+
 window.lePdf = lePdf;
